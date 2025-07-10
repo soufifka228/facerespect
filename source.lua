@@ -2,20 +2,27 @@ local UIS = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 
 local themes = {
-    Dark = {
-        Background = Color3.fromRGB(28, 30, 38),
-        Accent = Color3.fromRGB(90, 130, 255),
-        Text = Color3.fromRGB(235, 235, 245),
-        Button = Color3.fromRGB(38, 40, 55),
-        ButtonHover = Color3.fromRGB(60, 70, 110),
+    Clarity = {
+        Background = Color3.fromRGB(24, 26, 32),
+        Accent = Color3.fromRGB(120, 170, 255),
+        Accent2 = Color3.fromRGB(80, 120, 255),
+        Text = Color3.fromRGB(240, 240, 255),
+        Button = Color3.fromRGB(32, 34, 44),
+        ButtonHover = Color3.fromRGB(44, 48, 64),
         ToggleOn = Color3.fromRGB(80, 200, 120),
-        ToggleOff = Color3.fromRGB(80, 80, 80),
-        Slider = Color3.fromRGB(90, 130, 255),
-        Dropdown = Color3.fromRGB(38, 40, 55),
-        DropdownItem = Color3.fromRGB(48, 50, 65),
-        MultiSelect = Color3.fromRGB(38, 40, 55),
-        Border = Color3.fromRGB(50, 55, 70),
+        ToggleOff = Color3.fromRGB(70, 70, 80),
+        Slider = Color3.fromRGB(120, 170, 255),
+        Dropdown = Color3.fromRGB(32, 34, 44),
+        DropdownItem = Color3.fromRGB(44, 48, 64),
+        MultiSelect = Color3.fromRGB(32, 34, 44),
+        Border = Color3.fromRGB(60, 65, 80),
         Shadow = Color3.fromRGB(0,0,0),
+        TabActive = Color3.fromRGB(120, 170, 255),
+        TabInactive = Color3.fromRGB(32, 34, 44),
+        TabTextActive = Color3.fromRGB(255,255,255),
+        TabTextInactive = Color3.fromRGB(180,180,200),
+        HeaderGradient1 = Color3.fromRGB(120, 170, 255),
+        HeaderGradient2 = Color3.fromRGB(80, 120, 255),
     }
 }
 
@@ -38,74 +45,98 @@ local function roundify(obj, radius)
     return uic
 end
 
+local function gradient(obj, c1, c2)
+    local grad = Instance.new("UIGradient")
+    grad.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, c1), ColorSequenceKeypoint.new(1, c2)}
+    grad.Rotation = 0
+    grad.Parent = obj
+    return grad
+end
+
 local UILib = {}
 UILib.__index = UILib
 
 function UILib.new(config)
     local self = setmetatable({}, UILib)
-    self.theme = themes[config and config.Theme or "Dark"] or themes.Dark
-    self.title = config and config.Title or "UI Library"
+    self.theme = themes["Clarity"]
+    self.title = config and config.Title or "Clarity v2 UI"
     self.tabs = {}
     self.activeTab = nil
-    self.drag = {dragging = false, offset = Vector2.new()}
+    self.drag = {dragging = false, dragStart = nil, startPos = nil}
 
     self.gui = create("ScreenGui", {Name = "UILibka", ResetOnSpawn = false, ZIndexBehavior = Enum.ZIndexBehavior.Global})
     self.gui.Parent = game:GetService("Players").LocalPlayer.PlayerGui
 
     self.window = create("Frame", {
         Name = "Window",
-        Size = UDim2.new(0, 500, 0, 370),
-        Position = UDim2.new(0.5, -250, 0.5, -185),
+        Size = UDim2.new(0, 540, 0, 370),
+        Position = UDim2.new(0.5, -270, 0.5, -185),
         BackgroundColor3 = self.theme.Background,
         BorderSizePixel = 0,
         AnchorPoint = Vector2.new(0.5, 0.5),
         Active = true,
         Draggable = false,
+        BackgroundTransparency = 0.15,
     })
     self.window.Parent = self.gui
-    roundify(self.window, 16)
+    roundify(self.window, 18)
 
-    local shadow = create("Frame", {
+    local shadow = create("ImageLabel", {
         Name = "Shadow",
-        Size = UDim2.new(1, 24, 1, 24),
-        Position = UDim2.new(0, -12, 0, -12),
-        BackgroundColor3 = self.theme.Shadow,
-        BorderSizePixel = 0,
-        BackgroundTransparency = 0.7,
+        Size = UDim2.new(1, 40, 1, 40),
+        Position = UDim2.new(0, -20, 0, -20),
+        BackgroundTransparency = 1,
+        Image = "rbxassetid://1316045217",
+        ImageTransparency = 0.85,
         ZIndex = 0,
     })
     shadow.Parent = self.window
-    roundify(shadow, 18)
 
-    self.titleBar = create("Frame", {
-        Name = "TitleBar",
-        Size = UDim2.new(1, 0, 0, 44),
-        BackgroundColor3 = self.theme.Accent,
+    self.header = create("Frame", {
+        Name = "Header",
+        Size = UDim2.new(1, 0, 0, 56),
+        BackgroundTransparency = 1,
         BorderSizePixel = 0,
         ZIndex = 2,
     })
-    self.titleBar.Parent = self.window
-    roundify(self.titleBar, 16)
+    self.header.Parent = self.window
+    local headerBG = create("Frame", {
+        Size = UDim2.new(1, 0, 1, 0),
+        BackgroundTransparency = 0.1,
+        BackgroundColor3 = self.theme.Accent,
+        BorderSizePixel = 0,
+        ZIndex = 2,
+        Parent = self.header,
+    })
+    roundify(headerBG, 18)
+    gradient(headerBG, self.theme.HeaderGradient1, self.theme.HeaderGradient2)
 
     local titleLabel = create("TextLabel", {
         Name = "TitleLabel",
-        Size = UDim2.new(1, 0, 1, 0),
+        Size = UDim2.new(1, -32, 1, 0),
         BackgroundTransparency = 1,
         Text = self.title,
         Font = Enum.Font.GothamBold,
-        TextSize = 22,
+        TextSize = 24,
         TextColor3 = self.theme.Text,
         TextXAlignment = Enum.TextXAlignment.Left,
-        Position = UDim2.new(0, 20, 0, 0),
+        Position = UDim2.new(0, 28, 0, 0),
         ZIndex = 3,
     })
-    titleLabel.Parent = self.titleBar
+    titleLabel.Parent = self.header
 
-    -- Drag logic (плавный)
-    self.titleBar.InputBegan:Connect(function(input)
+    -- Drag logic (Clarity-style, без улётов)
+    self.header.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             self.drag.dragging = true
-            self.drag.offset = Vector2.new(input.Position.X, input.Position.Y) - Vector2.new(self.window.AbsolutePosition.X, self.window.AbsolutePosition.Y)
+            self.drag.dragStart = input.Position
+            self.drag.startPos = self.window.Position
+        end
+    end)
+    UIS.InputChanged:Connect(function(input)
+        if self.drag.dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - self.drag.dragStart
+            self.window.Position = self.drag.startPos + UDim2.new(0, delta.X, 0, delta.Y)
         end
     end)
     UIS.InputEnded:Connect(function(input)
@@ -113,29 +144,24 @@ function UILib.new(config)
             self.drag.dragging = false
         end
     end)
-    UIS.InputChanged:Connect(function(input)
-        if self.drag.dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local pos = Vector2.new(input.Position.X, input.Position.Y) - self.drag.offset
-            tween(self.window, {Position = UDim2.new(0, pos.X, 0, pos.Y)}, 0.12)
-        end
-    end)
 
+    -- Боковая панель вкладок
     self.tabBar = create("Frame", {
         Name = "TabBar",
-        Size = UDim2.new(1, 0, 0, 38),
-        Position = UDim2.new(0, 0, 0, 44),
-        BackgroundColor3 = self.theme.Button,
+        Size = UDim2.new(0, 120, 1, -56),
+        Position = UDim2.new(0, 0, 0, 56),
+        BackgroundColor3 = self.theme.TabInactive,
         BorderSizePixel = 0,
         ZIndex = 2,
     })
     self.tabBar.Parent = self.window
-    roundify(self.tabBar, 12)
+    roundify(self.tabBar, 14)
 
     self.tabButtons = {}
     self.tabContent = create("Frame", {
         Name = "TabContent",
-        Size = UDim2.new(1, 0, 1, -82),
-        Position = UDim2.new(0, 0, 0, 82),
+        Size = UDim2.new(1, -120, 1, -56),
+        Position = UDim2.new(0, 120, 0, 56),
         BackgroundTransparency = 1,
         BorderSizePixel = 0,
         ZIndex = 2,
@@ -151,23 +177,23 @@ function UILib:AddTab(tabName)
     local idx = #self.tabs
     local btn = create("TextButton", {
         Name = "TabButton" .. idx,
-        Size = UDim2.new(0, 130, 1, 0),
-        Position = UDim2.new(0, (idx-1)*134, 0, 0),
-        BackgroundColor3 = self.theme.Button,
+        Size = UDim2.new(1, 0, 0, 44),
+        Position = UDim2.new(0, 0, 0, (idx-1)*48+8),
+        BackgroundColor3 = self.theme.TabInactive,
         BorderSizePixel = 0,
         Text = tabName,
-        Font = Enum.Font.Gotham,
+        Font = Enum.Font.GothamBold,
         TextSize = 17,
-        TextColor3 = self.theme.Text,
+        TextColor3 = self.theme.TabTextInactive,
         ZIndex = 3,
         AutoButtonColor = false,
     })
     roundify(btn, 10)
     btn.MouseEnter:Connect(function()
-        tween(btn, {BackgroundColor3 = self.theme.ButtonHover}, 0.15)
+        if self.activeTab ~= idx then tween(btn, {BackgroundColor3 = self.theme.ButtonHover}, 0.15) end
     end)
     btn.MouseLeave:Connect(function()
-        tween(btn, {BackgroundColor3 = self.theme.Button}, 0.15)
+        if self.activeTab ~= idx then tween(btn, {BackgroundColor3 = self.theme.TabInactive}, 0.15) end
     end)
     btn.MouseButton1Click:Connect(function()
         self:SelectTab(idx)
@@ -189,17 +215,21 @@ end
 function UILib:SelectTab(idx)
     self.activeTab = idx
     for i, btn in ipairs(self.tabButtons) do
-        btn.BackgroundColor3 = (i == idx) and self.theme.Accent or self.theme.Button
+        if i == idx then
+            tween(btn, {BackgroundColor3 = self.theme.TabActive, TextColor3 = self.theme.TabTextActive}, 0.18)
+        else
+            tween(btn, {BackgroundColor3 = self.theme.TabInactive, TextColor3 = self.theme.TabTextInactive}, 0.18)
+        end
     end
     for _, child in ipairs(self.tabContent:GetChildren()) do
         child:Destroy()
     end
-    local y = 12
+    local y = 18
     for _, el in ipairs(self.tabs[idx].Elements) do
         local ui = el()
         ui.Position = UDim2.new(0, 24, 0, y)
         ui.Parent = self.tabContent
-        y = y + ui.Size.Y.Offset + 14
+        y = y + ui.Size.Y.Offset + 18
     end
 end
 
@@ -519,11 +549,14 @@ function UILib:SetTheme(themeName)
     if themes[themeName] then
         self.theme = themes[themeName]
         self.window.BackgroundColor3 = self.theme.Background
-        self.titleBar.BackgroundColor3 = self.theme.Accent
-        self.tabBar.BackgroundColor3 = self.theme.Button
+        self.header.BackgroundColor3 = self.theme.Accent
+        self.tabBar.BackgroundColor3 = self.theme.TabInactive
         for i, btn in ipairs(self.tabButtons) do
-            btn.BackgroundColor3 = (i == self.activeTab) and self.theme.Accent or self.theme.Button
-            btn.TextColor3 = self.theme.Text
+            if i == self.activeTab then
+                tween(btn, {BackgroundColor3 = self.theme.TabActive, TextColor3 = self.theme.TabTextActive}, 0.18)
+            else
+                tween(btn, {BackgroundColor3 = self.theme.TabInactive, TextColor3 = self.theme.TabTextInactive}, 0.18)
+            end
         end
         for _, child in ipairs(self.tabContent:GetChildren()) do
             if child:IsA("TextButton") or child:IsA("TextLabel") then
