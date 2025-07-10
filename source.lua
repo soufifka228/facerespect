@@ -53,6 +53,20 @@ local function gradient(obj, c1, c2)
     return grad
 end
 
+local function animateDropdown(frame, open, targetHeight)
+    if open then
+        frame.Visible = true
+        frame.BackgroundTransparency = 1
+        frame.Size = UDim2.new(1, 0, 0, 0)
+        tween(frame, {Size = UDim2.new(1, 0, 0, targetHeight)}, 0.18)
+        tween(frame, {BackgroundTransparency = 0}, 0.18)
+    else
+        tween(frame, {Size = UDim2.new(1, 0, 0, 0)}, 0.18)
+        tween(frame, {BackgroundTransparency = 1}, 0.18)
+        delay(0.18, function() frame.Visible = false end)
+    end
+end
+
 local UILib = {}
 UILib.__index = UILib
 
@@ -108,7 +122,7 @@ function UILib.new(config)
         ZIndex = 2,
         Parent = self.header,
     })
-    roundify(headerBG, 18)
+    -- Без скругления header
     gradient(headerBG, self.theme.HeaderGradient1, self.theme.HeaderGradient2)
 
     local titleLabel = create("TextLabel", {
@@ -145,7 +159,7 @@ function UILib.new(config)
         end
     end)
 
-    -- Боковая панель вкладок
+    -- Боковая панель вкладок (без скругления)
     self.tabBar = create("Frame", {
         Name = "TabBar",
         Size = UDim2.new(0, 120, 1, -56),
@@ -155,7 +169,7 @@ function UILib.new(config)
         ZIndex = 2,
     })
     self.tabBar.Parent = self.window
-    roundify(self.tabBar, 14)
+    -- Без roundify(self.tabBar)
 
     self.tabButtons = {}
     self.tabContent = create("Frame", {
@@ -188,7 +202,7 @@ function UILib:AddTab(tabName)
         ZIndex = 3,
         AutoButtonColor = false,
     })
-    roundify(btn, 10)
+    -- Без roundify(btn)
     btn.MouseEnter:Connect(function()
         if self.activeTab ~= idx then tween(btn, {BackgroundColor3 = self.theme.ButtonHover}, 0.15) end
     end)
@@ -227,9 +241,9 @@ function UILib:SelectTab(idx)
     local y = 18
     for _, el in ipairs(self.tabs[idx].Elements) do
         local ui = el()
-        ui.Position = UDim2.new(0, 24, 0, y)
+        ui.Position = UDim2.new(0, 32, 0, y)
         ui.Parent = self.tabContent
-        y = y + ui.Size.Y.Offset + 18
+        y = y + ui.Size.Y.Offset + 22
     end
 end
 
@@ -261,7 +275,7 @@ end
 function UILib:AddToggle(tabIdx, text, default, callback)
     table.insert(self.tabs[tabIdx].Elements, function()
         local frame = create("Frame", {
-            Size = UDim2.new(0, 220, 0, 40),
+            Size = UDim2.new(0, 260, 0, 40),
             BackgroundTransparency = 1,
             ZIndex = 4,
         })
@@ -274,6 +288,15 @@ function UILib:AddToggle(tabIdx, text, default, callback)
         })
         roundify(box, 8)
         box.Parent = frame
+        local check = create("ImageLabel", {
+            Size = UDim2.new(1, -8, 1, -8),
+            Position = UDim2.new(0, 4, 0, 4),
+            BackgroundTransparency = 1,
+            Image = "rbxassetid://6031094678", -- галочка
+            ImageTransparency = default and 0 or 1,
+            ZIndex = 6,
+        })
+        check.Parent = box
         local txt = create("TextLabel", {
             Size = UDim2.new(1, -44, 1, 0),
             Position = UDim2.new(0, 44, 0, 0),
@@ -287,11 +310,15 @@ function UILib:AddToggle(tabIdx, text, default, callback)
         })
         txt.Parent = frame
         local state = default
+        local function setState(val)
+            state = val
+            tween(box, {BackgroundColor3 = state and self.theme.ToggleOn or self.theme.ToggleOff}, 0.18)
+            tween(check, {ImageTransparency = state and 0 or 1}, 0.18)
+            callback(state)
+        end
         frame.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                state = not state
-                tween(box, {BackgroundColor3 = state and self.theme.ToggleOn or self.theme.ToggleOff}, 0.15)
-                callback(state)
+                setState(not state)
             end
         end)
         return frame
@@ -301,7 +328,7 @@ end
 function UILib:AddSlider(tabIdx, text, min, max, default, callback)
     table.insert(self.tabs[tabIdx].Elements, function()
         local frame = create("Frame", {
-            Size = UDim2.new(0, 220, 0, 54),
+            Size = UDim2.new(0, 260, 0, 54),
             BackgroundTransparency = 1,
             ZIndex = 4,
         })
@@ -318,8 +345,8 @@ function UILib:AddSlider(tabIdx, text, min, max, default, callback)
         })
         label.Parent = frame
         local bar = create("Frame", {
-            Size = UDim2.new(1, -24, 0, 14),
-            Position = UDim2.new(0, 12, 0, 28),
+            Size = UDim2.new(1, -32, 0, 14),
+            Position = UDim2.new(0, 16, 0, 28),
             BackgroundColor3 = self.theme.ToggleOff,
             BorderSizePixel = 0,
             ZIndex = 5,
@@ -335,20 +362,36 @@ function UILib:AddSlider(tabIdx, text, min, max, default, callback)
         roundify(fill, 7)
         fill.Parent = bar
         local knob = create("Frame", {
-            Size = UDim2.new(0, 18, 0, 18),
-            Position = UDim2.new((default-min)/(max-min), -9, 0.5, -9),
+            Size = UDim2.new(0, 20, 0, 20),
+            Position = UDim2.new((default-min)/(max-min), -10, 0.5, -10),
             BackgroundColor3 = self.theme.Accent,
             BorderSizePixel = 0,
             ZIndex = 7,
         })
-        roundify(knob, 9)
+        roundify(knob, 10)
         knob.Parent = bar
+        local shadow = create("ImageLabel", {
+            Size = UDim2.new(1, 8, 1, 8),
+            Position = UDim2.new(0, -4, 0, -4),
+            BackgroundTransparency = 1,
+            Image = "rbxassetid://1316045217",
+            ImageTransparency = 0.85,
+            ZIndex = 6,
+        })
+        shadow.Parent = knob
         local dragging = false
-        local function setSlider(rel)
+        local sliderVal = default
+        local function setSlider(rel, anim)
             rel = math.clamp(rel, 0, 1)
             local val = math.floor((min + (max-min)*rel) + 0.5)
-            fill.Size = UDim2.new(rel, 0, 1, 0)
-            knob.Position = UDim2.new(rel, -9, 0.5, -9)
+            sliderVal = val
+            if anim then
+                tween(fill, {Size = UDim2.new(rel, 0, 1, 0)}, 0.18)
+                tween(knob, {Position = UDim2.new(rel, -10, 0.5, -10)}, 0.18)
+            else
+                fill.Size = UDim2.new(rel, 0, 1, 0)
+                knob.Position = UDim2.new(rel, -10, 0.5, -10)
+            end
             label.Text = text .. ": " .. tostring(val)
             callback(val)
         end
@@ -356,27 +399,30 @@ function UILib:AddSlider(tabIdx, text, min, max, default, callback)
             if input.UserInputType == Enum.UserInputType.MouseButton1 then
                 dragging = true
                 local rel = (input.Position.X - bar.AbsolutePosition.X) / bar.AbsoluteSize.X
-                tween(knob, {BackgroundColor3 = self.theme.Accent}, 0.1)
-                setSlider(rel)
+                setSlider(rel, true)
             end
         end)
         knob.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1 then
                 dragging = true
-                tween(knob, {BackgroundColor3 = self.theme.Accent}, 0.1)
             end
         end)
         UIS.InputEnded:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1 then
                 dragging = false
-                tween(knob, {BackgroundColor3 = self.theme.Accent}, 0.1)
             end
         end)
         UIS.InputChanged:Connect(function(input)
             if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
                 local rel = (input.Position.X - bar.AbsolutePosition.X) / bar.AbsoluteSize.X
-                setSlider(rel)
+                setSlider(rel, true)
             end
+        end)
+        knob.MouseEnter:Connect(function()
+            tween(knob, {BackgroundColor3 = self.theme.Accent2}, 0.15)
+        end)
+        knob.MouseLeave:Connect(function()
+            tween(knob, {BackgroundColor3 = self.theme.Accent}, 0.15)
         end)
         return frame
     end)
@@ -385,7 +431,7 @@ end
 function UILib:AddDropdown(tabIdx, text, items, default, callback)
     table.insert(self.tabs[tabIdx].Elements, function()
         local frame = create("Frame", {
-            Size = UDim2.new(0, 220, 0, 44),
+            Size = UDim2.new(0, 260, 0, 44),
             BackgroundTransparency = 1,
             ZIndex = 4,
         })
@@ -419,18 +465,20 @@ function UILib:AddDropdown(tabIdx, text, items, default, callback)
         local dropdownFrame
         box.MouseButton1Click:Connect(function()
             if open then
-                if dropdownFrame then dropdownFrame:Destroy() end
+                if dropdownFrame then animateDropdown(dropdownFrame, false, #items*24) end
                 open = false
                 return
             end
             open = true
             dropdownFrame = create("Frame", {
-                Size = UDim2.new(1, 0, 0, #items*24),
+                Size = UDim2.new(1, 0, 0, 0),
                 Position = UDim2.new(0, 0, 1, 2),
                 BackgroundColor3 = self.theme.Dropdown,
                 BorderSizePixel = 0,
                 ZIndex = 10,
                 Parent = box,
+                BackgroundTransparency = 1,
+                Visible = true,
             })
             roundify(dropdownFrame, 8)
             for i, v in ipairs(items) do
@@ -451,10 +499,11 @@ function UILib:AddDropdown(tabIdx, text, items, default, callback)
                 item.MouseButton1Click:Connect(function()
                     box.Text = v
                     callback(v)
-                    dropdownFrame:Destroy()
+                    animateDropdown(dropdownFrame, false, #items*24)
                     open = false
                 end)
             end
+            animateDropdown(dropdownFrame, true, #items*24)
         end)
         return frame
     end)
@@ -463,7 +512,7 @@ end
 function UILib:AddMultiSelect(tabIdx, text, items, defaults, callback)
     table.insert(self.tabs[tabIdx].Elements, function()
         local frame = create("Frame", {
-            Size = UDim2.new(0, 220, 0, 54),
+            Size = UDim2.new(0, 260, 0, 54),
             BackgroundTransparency = 1,
             ZIndex = 4,
         })
@@ -505,18 +554,20 @@ function UILib:AddMultiSelect(tabIdx, text, items, defaults, callback)
         end
         box.MouseButton1Click:Connect(function()
             if open then
-                if dropdownFrame then dropdownFrame:Destroy() end
+                if dropdownFrame then animateDropdown(dropdownFrame, false, #items*24) end
                 open = false
                 return
             end
             open = true
             dropdownFrame = create("Frame", {
-                Size = UDim2.new(1, 0, 0, #items*24),
+                Size = UDim2.new(1, 0, 0, 0),
                 Position = UDim2.new(0, 0, 1, 2),
                 BackgroundColor3 = self.theme.Dropdown,
                 BorderSizePixel = 0,
                 ZIndex = 10,
                 Parent = box,
+                BackgroundTransparency = 1,
+                Visible = true,
             })
             roundify(dropdownFrame, 8)
             for i, v in ipairs(items) do
@@ -540,6 +591,7 @@ function UILib:AddMultiSelect(tabIdx, text, items, defaults, callback)
                     updateText()
                 end)
             end
+            animateDropdown(dropdownFrame, true, #items*24)
         end)
         return frame
     end)
