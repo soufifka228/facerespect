@@ -77,20 +77,18 @@ function Luxt1.CreateWindow(libName, logoId)
                     LuxtLib.Enabled = false
                     shadow.ImageTransparency = 0.2
                     MainFrame.BackgroundTransparency = 0
-                    fadeAll(shadow, 0, 0)
-                    fadeAll(MainFrame, 0, 0)
                 else
                     LuxtLib.Enabled = true
                     shadow.ImageTransparency = 1
                     MainFrame.BackgroundTransparency = 1
                     fadeAll(shadow, 1, 0)
                     fadeAll(MainFrame, 1, 0)
+                    fadeAll(shadow, 0, 0.1)
+                    fadeAll(MainFrame, 0, 0.1)
                     local fadeIn = game.TweenService:Create(shadow, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {ImageTransparency = 0.2})
                     local fadeIn2 = game.TweenService:Create(MainFrame, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 0})
                     fadeIn:Play()
                     fadeIn2:Play()
-                    fadeAll(shadow, 0, 0.1)
-                    fadeAll(MainFrame, 0, 0.1)
                 end
             end
         end
