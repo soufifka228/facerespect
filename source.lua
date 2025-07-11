@@ -63,6 +63,24 @@ function Luxt1.CreateWindow(libName, logoId)
         end
     end
 
+    local function setAllTransparency(root, to)
+        for _, v in pairs(root:GetDescendants()) do
+            if v:IsA("Frame") or v:IsA("ScrollingFrame") then
+                pcall(function() v.BackgroundTransparency = to end)
+            elseif v:IsA("TextLabel") or v:IsA("TextButton") or v:IsA("TextBox") then
+                pcall(function()
+                    v.TextTransparency = to
+                    v.BackgroundTransparency = to
+                end)
+            elseif v:IsA("ImageLabel") or v:IsA("ImageButton") then
+                pcall(function()
+                    v.ImageTransparency = to
+                    v.BackgroundTransparency = to
+                end)
+            end
+        end
+    end
+
     game:GetService("UserInputService").InputBegan:connect(function(current, ok) 
         if not ok then 
             if current.KeyCode.Name == oldKey then 
@@ -77,18 +95,23 @@ function Luxt1.CreateWindow(libName, logoId)
                     LuxtLib.Enabled = false
                     shadow.ImageTransparency = 0.2
                     MainFrame.BackgroundTransparency = 0
+                    setAllTransparency(shadow, 1)
+                    setAllTransparency(MainFrame, 1)
                 else
                     LuxtLib.Enabled = true
                     shadow.ImageTransparency = 1
                     MainFrame.BackgroundTransparency = 1
-                    fadeAll(shadow, 1, 0)
-                    fadeAll(MainFrame, 1, 0)
+                    setAllTransparency(shadow, 1)
+                    setAllTransparency(MainFrame, 1)
                     fadeAll(shadow, 0, 0.1)
                     fadeAll(MainFrame, 0, 0.1)
                     local fadeIn = game.TweenService:Create(shadow, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {ImageTransparency = 0.2})
                     local fadeIn2 = game.TweenService:Create(MainFrame, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 0})
                     fadeIn:Play()
                     fadeIn2:Play()
+                    fadeIn.Completed:Wait()
+                    setAllTransparency(shadow, 0)
+                    setAllTransparency(MainFrame, 0)
                 end
             end
         end
