@@ -1,26 +1,5 @@
 local Luxt1 = {}
 
-local Players = game:GetService("Players")
-local HttpService = game:GetService("HttpService")
-
--- Получаем LocalPlayer'а
-local localUserId = Players.LocalPlayer.UserId
-
--- Получаем URL аватара текущего игрока
-local function getMyAvatarUrl()
-	local url = "https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds="..localUserId.."&size=48x48&format=Png&isCircular=true"
-	local success, result = pcall(function()
-		return game:HttpGet(url)
-	end)
-	if success then
-		local data = HttpService:JSONDecode(result)
-		if data and data.data and data.data[1] then
-			return data.data[1].imageUrl
-		end
-	end
-	return nil
-end
-
 function Luxt1.CreateWindow(libName, logoId)
     local LuxtLib = Instance.new("ScreenGui")
     local shadow = Instance.new("ImageLabel")
@@ -70,9 +49,22 @@ function Luxt1.CreateWindow(libName, logoId)
         if not ok then 
             if current.KeyCode.Name == oldKey then 
                 if LuxtLib.Enabled == true then
+                    local fadeOut = game.TweenService:Create(shadow, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {ImageTransparency = 1})
+                    local fadeOut2 = game.TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 1})
+                    fadeOut:Play()
+                    fadeOut2:Play()
+                    fadeOut.Completed:Wait()
                     LuxtLib.Enabled = false
+                    shadow.ImageTransparency = 0.2
+                    MainFrame.BackgroundTransparency = 0
                 else
                     LuxtLib.Enabled = true
+                    shadow.ImageTransparency = 1
+                    MainFrame.BackgroundTransparency = 1
+                    local fadeIn = game.TweenService:Create(shadow, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {ImageTransparency = 0.2})
+                    local fadeIn2 = game.TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 0})
+                    fadeIn:Play()
+                    fadeIn2:Play()
                 end
             end
         end
@@ -158,29 +150,17 @@ function Luxt1.CreateWindow(libName, logoId)
     sideCover.Position = UDim2.new(0.909677446, 0, 0, 0)
     sideCover.Size = UDim2.new(0, 14, 0, 452)
 
--- Создаём логотип
-local hubLogo = Instance.new("ImageLabel")
-hubLogo.Name = "hubLogo"
-hubLogo.Parent = sideHeading -- замени на свой родитель
-hubLogo.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-hubLogo.Position = UDim2.new(0.0567928664, 0, 0.0243411884, 0)
-hubLogo.Size = UDim2.new(0, 30, 0, 30)
-hubLogo.ZIndex = 2
-hubLogo.BackgroundTransparency = 1 -- прозрачный фон
-
-
+    hubLogo.Name = "hubLogo"
+    hubLogo.Parent = sideHeading
+    hubLogo.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    hubLogo.Position = UDim2.new(0.0567928664, 0, 0.0243411884, 0)
+    hubLogo.Size = UDim2.new(0, 30, 0, 30)
+    hubLogo.ZIndex = 2
+    hubLogo.Image = "rbxassetid://"..logoId
 
     MainCorner_2.CornerRadius = UDim.new(0, 999)
     MainCorner_2.Name = "MainCorner"
     MainCorner_2.Parent = hubLogo
-
-    -- Вставляем аватар
-local avatarUrl = getMyAvatarUrl()
-if avatarUrl then
-	hubLogo.Image = avatarUrl
-else
-	hubLogo.Image = "rbxassetid://12345678" -- запасной логотип
-end
 
     hubName.Name = "hubName"
     hubName.Parent = sideHeading
