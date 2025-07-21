@@ -1,0 +1,135 @@
+local function SafeGetService(name)
+    local Service = (game.GetService);
+	local Reference = (cloneref) or function(reference) return reference end
+	return Reference(Service(game, name));
+end
+
+local player = SafeGetService("Players").LocalPlayer
+
+local function protectUI(sGui)
+    if sGui:IsA("ScreenGui") then
+        sGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+		sGui.DisplayOrder = 999999999
+		sGui.ResetOnSpawn = false
+		sGui.IgnoreGuiInset = true
+    end
+    local cGUI = SafeGetService("CoreGui")
+    local lPlr = SafeGetService("Players").LocalPlayer
+
+    local function NAProtection(inst, var)
+        if inst then
+            if var then
+                inst[var] = "\0"
+                inst.Archivable = false
+            else
+                inst.Name = "\0"
+                inst.Archivable = false
+            end
+        end
+    end
+
+    if gethui then
+		NAProtection(sGui)
+		sGui.Parent = gethui()
+		return sGui
+	elseif cGUI and cGUI:FindFirstChild("RobloxGui") then
+		NAProtection(sGui)
+		sGui.Parent = cGUI:FindFirstChild("RobloxGui")
+		return sGui
+	elseif cGUI then
+		NAProtection(sGui)
+		sGui.Parent = cGUI
+		return sGui
+	elseif lPlr and lPlr:FindFirstChildWhichIsA("PlayerGui") then
+		NAProtection(sGui)
+		sGui.Parent = lPlr:FindFirstChildWhichIsA("PlayerGui")
+		sGui.ResetOnSpawn = false
+		return sGui
+	else
+		return nil
+	end
+end
+
+local screenGui = Instance.new("ScreenGui")
+protectUI(screenGui)
+screenGui.Name = math.random(1, 100000)
+screenGui.ResetOnSpawn = false
+
+local listLayout = Instance.new("UIListLayout")
+listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+listLayout.Parent = screenGui
+listLayout.FillDirection = Enum.FillDirection.Vertical
+listLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+listLayout.VerticalAlignment = Enum.VerticalAlignment.Top
+
+local toggleButton = Instance.new("TextButton")
+toggleButton.Name = "ToggleTPWalkButton"
+toggleButton.Text = "Toggle TPWalk"
+toggleButton.TextScaled = true
+toggleButton.LayoutOrder = 1
+toggleButton.Size = UDim2.new(0, 50, 0, 30)
+toggleButton.Position = UDim2.new(0.5, -75, 0, 0)
+toggleButton.Parent = screenGui
+
+local speedTextBox = Instance.new("TextBox")
+speedTextBox.Name = "SpeedTextBox"
+speedTextBox.Text = "Enter Speed"
+speedTextBox.TextScaled = true
+speedTextBox.Size = UDim2.new(0, 100, 0, 30)
+speedTextBox.Position = UDim2.new(0.5, -75, 0, 50)
+speedTextBox.Parent = screenGui
+
+local TPWalk = false
+local TPWalking
+local Speed = 1
+local DefaultSpeed = 1
+
+local function toggleTPWalk()
+    if TPWalk then
+        TPWalk = false
+        TPWalking:Disconnect()
+    else
+        TPWalk = true
+        TPWalking = SafeGetService("RunService").Stepped:Connect(function()
+            if TPWalk then
+                local character = player.Character
+                local humanoid = character and character:FindFirstChildWhichIsA("Humanoid")
+
+                if humanoid and humanoid.MoveDirection.Magnitude > 0 then
+                    local moveDirection = humanoid.MoveDirection
+
+                    if Speed then
+                        character:TranslateBy(moveDirection * Speed)
+                    else
+                        character:TranslateBy(moveDirection)
+                    end
+                end
+            else
+                TPWalking:Disconnect()
+            end
+        end)
+    end
+end
+
+local function updateSpeed()
+    local newSpeed = tonumber(speedTextBox.Text)
+
+    if newSpeed then
+        local formattedSpeed = string.format("%.1f", newSpeed)
+        Speed = tonumber(formattedSpeed)
+        speedTextBox.Text = formattedSpeed
+    else
+        speedTextBox.Text = "1"
+        Speed = 1
+    end
+end
+toggleButton.MouseButton1Click:Connect(toggleTPWalk)
+speedTextBox.FocusLost:Connect(updateSpeed)
+
+speedTextBox:GetPropertyChangedSignal("Text"):Connect(function()
+    local newText = speedTextBox.Text:gsub("[^%d.]", "")
+
+    if newText ~= speedTextBox.Text then
+        speedTextBox.Text = newText
+    end
+end)
