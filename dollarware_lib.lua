@@ -2566,7 +2566,7 @@ do
                                         
                                         round.Parent = inputBox
                                     end
-                                
+                                    
                                     local stroke = Instance.new('UIStroke') do 
                                         stroke.ApplyStrokeMode = 'Border'
                                         stroke.Color = theme.Stroke
@@ -7380,7 +7380,7 @@ do
                     local controlFrame = Instance.new('Frame')
                     controlFrame.BackgroundTransparency = 1
                     controlFrame.Name = '#control'
-                    controlFrame.Size = UDim2.new(1, 0, 0, 20)
+                    controlFrame.Size = UDim2.fromScale(1, 0.05)
                     controlFrame.Visible = true
                     controlFrame.ZIndex = 34
                     
@@ -7389,7 +7389,7 @@ do
                     local back = Instance.new('TextButton') do 
                         back.BackgroundTransparency = 1
                         back.Name = '#back'
-                        back.Size = UDim.fromScale(1, 1)
+                        back.Size = UDim2.fromScale(1, 1)
                         back.Text = ''
                         back.TextTransparency = 1
                         back.ZIndex = 34
@@ -7401,7 +7401,7 @@ do
                             label.Font = 'SourceSans'
                             label.Name = '#label'
                             label.RichText = true
-                            label.Size = UDim.fromScale(1, 1)
+                            label.Size = UDim2.fromScale(1, 1)
                             label.Text = 'button'
                             label.TextColor3 = theme.TextPrimary
                             label.TextSize = 14
