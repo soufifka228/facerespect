@@ -6464,7 +6464,7 @@ do
                         local bMin = titleBar['#button-min']
                         local title = titleBar['#title']
                         
-                        local offset = UDim2.fromOffset(50, 0) 
+                        local offset = UDim.fromOffset(50, 0) 
                         
                         bClose.Position += offset
                         bMin.Position += offset
@@ -7389,7 +7389,7 @@ do
                     local back = Instance.new('TextButton') do 
                         back.BackgroundTransparency = 1
                         back.Name = '#back'
-                        back.Size = UDim2.fromScale(1, 1)
+                        back.Size = UDim.fromScale(1, 1)
                         back.Text = ''
                         back.TextTransparency = 1
                         back.ZIndex = 34
@@ -7401,7 +7401,7 @@ do
                             label.Font = 'SourceSans'
                             label.Name = '#label'
                             label.RichText = true
-                            label.Size = UDim2.fromScale(1, 1)
+                            label.Size = UDim.fromScale(1, 1)
                             label.Text = 'button'
                             label.TextColor3 = theme.TextPrimary
                             label.TextSize = 14
@@ -7829,7 +7829,7 @@ do
     do 
         local hotkeys = ui.hotkeys
         ui.hkCon = inputService.InputBegan:Connect(function(io, gpe) 
-            if ((not gpe) and (io.UserInputType.Name == 'Keyboard')) then
+            if (io.UserInputType.Name == 'Keyboard') then
                 local kc = io.KeyCode
                 
                 for i = 1, #hotkeys do 
@@ -7848,7 +7848,6 @@ end
 
 -- [CUSTOM] Toggle UI on Insert key
 inputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
     if input.KeyCode == Enum.KeyCode.Insert then
         if uiScreen then
             uiScreen.Enabled = not uiScreen.Enabled
