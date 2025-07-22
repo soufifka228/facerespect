@@ -7846,16 +7846,27 @@ do
     end
 end
 
--- [CUSTOM] Toggle UI on Insert key (теперь скрывает mainFrame.Visible, а не uiScreen.Enabled)
-game:GetService("UserInputService").InputBegan:Connect(function(input, processed)
-    if not processed and input.KeyCode == Enum.KeyCode.Insert then
-        if ui and ui.windows then
-            for _, win in ipairs(ui.windows) do
-                if win.instances and win.instances.mainFrame then
-                    win.instances.mainFrame.Visible = not win.instances.mainFrame.Visible
-                end
+-- [CUSTOM] Toggle UI function и хоткей Insert (как в source.lua)
+function ui.Toggle()
+    if ui and ui.windows then
+        local anyVisible = false
+        for _, win in ipairs(ui.windows) do
+            if win.instances and win.instances.mainFrame and win.instances.mainFrame.Visible then
+                anyVisible = true
+                break
             end
         end
+        for _, win in ipairs(ui.windows) do
+            if win.instances and win.instances.mainFrame then
+                win.instances.mainFrame.Visible = not anyVisible
+            end
+        end
+    end
+end
+
+game:GetService("UserInputService").InputBegan:Connect(function(input, processed)
+    if not processed and input.KeyCode == Enum.KeyCode.Insert then
+        ui.Toggle()
     end
 end)
 
