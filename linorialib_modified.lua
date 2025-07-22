@@ -129,7 +129,7 @@ function Library:Create(Class, Properties)
     end;
 
     if Class == 'Frame' or Class == 'ScrollingFrame' then
-        self:ApplyGlassEffect(_Instance)
+      --  self:ApplyGlassEffect(_Instance)
     elseif Class == 'TextLabel' or Class == 'TextBox' or Class == 'TextButton' then
         local corner = Instance.new('UICorner', _Instance)
         corner.CornerRadius = UDim.new(0, 8)
