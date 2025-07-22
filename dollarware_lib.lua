@@ -7846,12 +7846,14 @@ do
     end
 end
 
--- [CUSTOM] Toggle UI on Insert key (универсально, с processed)
+-- [CUSTOM] Toggle UI on Insert key (теперь скрывает mainFrame.Visible, а не uiScreen.Enabled)
 game:GetService("UserInputService").InputBegan:Connect(function(input, processed)
-    if not processed then
-        if input.KeyCode == Enum.KeyCode.Insert then
-            if uiScreen then
-                uiScreen.Enabled = not uiScreen.Enabled
+    if not processed and input.KeyCode == Enum.KeyCode.Insert then
+        if ui and ui.windows then
+            for _, win in ipairs(ui.windows) do
+                if win.instances and win.instances.mainFrame then
+                    win.instances.mainFrame.Visible = not win.instances.mainFrame.Visible
+                end
             end
         end
     end
