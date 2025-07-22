@@ -6623,7 +6623,7 @@ do
                     controlFrame.BackgroundTransparency = 1
                     controlFrame.BackgroundColor3 = Color3.new(1, 0, 1)
                     controlFrame.Name = '#control'
-                    controlFrame.Size = UDim2.new(1, 0, 0, 20)
+                    controlFrame.Size = UDim2.fromOffset(100, 20)
                     controlFrame.Visible = true
                     controlFrame.ZIndex = 34
                     
@@ -7846,11 +7846,13 @@ do
     end
 end
 
--- [CUSTOM] Toggle UI on Insert key (safe, standalone)
-inputService.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.Insert then
-        if uiScreen then
-            uiScreen.Enabled = not uiScreen.Enabled
+-- [CUSTOM] Toggle UI on Insert key (универсально, с processed)
+game:GetService("UserInputService").InputBegan:Connect(function(input, processed)
+    if not processed then
+        if input.KeyCode == Enum.KeyCode.Insert then
+            if uiScreen then
+                uiScreen.Enabled = not uiScreen.Enabled
+            end
         end
     end
 end)
