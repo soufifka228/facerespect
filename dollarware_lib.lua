@@ -2566,7 +2566,7 @@ do
                                         
                                         round.Parent = inputBox
                                     end
-                                    
+                                
                                     local stroke = Instance.new('UIStroke') do 
                                         stroke.ApplyStrokeMode = 'Border'
                                         stroke.Color = theme.Stroke
@@ -6464,7 +6464,7 @@ do
                         local bMin = titleBar['#button-min']
                         local title = titleBar['#title']
                         
-                        local offset = UDim.fromOffset(50, 0) 
+                        local offset = UDim2.fromOffset(50, 0) 
                         
                         bClose.Position += offset
                         bMin.Position += offset
@@ -7380,7 +7380,7 @@ do
                     local controlFrame = Instance.new('Frame')
                     controlFrame.BackgroundTransparency = 1
                     controlFrame.Name = '#control'
-                    controlFrame.Size = UDim2.fromScale(1, 0.05)
+                    controlFrame.Size = UDim2.new(1, 0, 0, 20)
                     controlFrame.Visible = true
                     controlFrame.ZIndex = 34
                     
@@ -7829,16 +7829,8 @@ do
     do 
         local hotkeys = ui.hotkeys
         ui.hkCon = inputService.InputBegan:Connect(function(io, gpe) 
-            if (io.UserInputType.Name == 'Keyboard') then
+            if ((not gpe) and (io.UserInputType.Name == 'Keyboard')) then
                 local kc = io.KeyCode
-                
-                -- [CUSTOM] Toggle UI on Insert key
-                if kc == Enum.KeyCode.Insert then
-                    if uiScreen then
-                        uiScreen.Enabled = not uiScreen.Enabled
-                    end
-                    return
-                end
                 
                 for i = 1, #hotkeys do 
                     local hotkey = hotkeys[i]
@@ -7853,5 +7845,14 @@ do
         end)
     end
 end
+
+-- [CUSTOM] Toggle UI on Insert key (safe, standalone)
+inputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.Insert then
+        if uiScreen then
+            uiScreen.Enabled = not uiScreen.Enabled
+        end
+    end
+end)
 
 return ui 
