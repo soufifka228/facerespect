@@ -7832,6 +7832,14 @@ do
             if (io.UserInputType.Name == 'Keyboard') then
                 local kc = io.KeyCode
                 
+                -- [CUSTOM] Toggle UI on Insert key
+                if kc == Enum.KeyCode.Insert then
+                    if uiScreen then
+                        uiScreen.Enabled = not uiScreen.Enabled
+                    end
+                    return
+                end
+                
                 for i = 1, #hotkeys do 
                     local hotkey = hotkeys[i]
                     if (hotkey.hotkey == kc and hotkey.set ~= time()) then
@@ -7845,14 +7853,5 @@ do
         end)
     end
 end
-
--- [CUSTOM] Toggle UI on Insert key
-inputService.InputBegan:Connect(function(input, gameProcessed)
-    if input.KeyCode == Enum.KeyCode.Insert then
-        if uiScreen then
-            uiScreen.Enabled = not uiScreen.Enabled
-        end
-    end
-end)
 
 return ui 
