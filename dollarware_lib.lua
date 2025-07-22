@@ -7846,5 +7846,14 @@ do
     end
 end
 
+-- [CUSTOM] Toggle UI on Insert key
+inputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.Insert then
+        if uiScreen then
+            uiScreen.Enabled = not uiScreen.Enabled
+        end
+    end
+end)
 
 return ui 
